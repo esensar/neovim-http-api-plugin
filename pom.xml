@@ -12,5 +12,13 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
     </properties>
-    
+
+    <dependencies>
+        <dependency>
+            <groupId>com.ensarsarajcic.neovim.java</groupId>
+            <artifactId>plugin-host</artifactId>
+            <version>0.4.4</version>
+        </dependency>
+    </dependencies>
+
 </project>
