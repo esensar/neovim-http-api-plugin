@@ -21,7 +21,7 @@ public final class NeovimRestApi {
     @NeovimRequestHandler
     public boolean start(StartOptions options) throws NeovimRequestException {
         try {
-            var handler = new NeovimHttpHandler(host.getApi());
+            var handler = new NeovimHttpHandler(host.getApiInfo(), host.getReactiveClient());
             var server = HttpServer.create();
             server.setExecutor(
                     Executors.newFixedThreadPool(
