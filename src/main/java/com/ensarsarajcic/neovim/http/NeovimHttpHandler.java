@@ -10,6 +10,7 @@ import com.ensarsarajcic.neovim.java.corerpc.reactive.ReactiveRpcClient;
 import com.ensarsarajcic.neovim.java.corerpc.reactive.ReactiveRpcStreamer;
 import com.ensarsarajcic.neovim.java.corerpc.reactive.RpcException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -134,10 +135,30 @@ public final class NeovimHttpHandler implements HttpHandler  {
                     exchange.close();
                     return;
                 }
+                var key = values[0];
+                var container = requestMap;
+                while (key.contains(".")) {
+                    var parent = key.split("\\.")[0];
+                    container.putIfAbsent(parent, new HashMap<>());
+                    container = (Map<String, Object>) container.get(parent);
+                    key = key.replaceFirst(parent + "\\.", "");
+                }
                 if (values.length == 1) {
-                    requestMap.put(values[0], null);
+                    container.put(key, null);
                 } else {
-                    requestMap.put(values[0], values[1]);
+                    try {
+                        container.put(key, Long.parseLong(values[1]));
+                    } catch (Exception ex) {
+                        try {
+                            container.put(key, Boolean.parseBoolean(values[1]));
+                        } catch (Exception e) {
+                            try {
+                                container.put(key, Double.parseDouble(values[1]));
+                            } catch (Exception exception) {
+                                container.put(key, values[1]);
+                            }
+                        }
+                    }
                 }
             }
         }
