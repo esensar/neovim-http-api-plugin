@@ -10,14 +10,17 @@ public final class StartOptions {
     private final int port;
     private final Integer threadCount;
     private final String rootUrl;
+    private final Integer requestTimeoutMs;
 
     public StartOptions(
             @JsonProperty("port") int port,
             @JsonProperty("thread_count") Integer threadCount,
-            @JsonProperty("root_url") String rootUrl) {
+            @JsonProperty("root_url") String rootUrl,
+            @JsonProperty("request_timeout_ms") Integer requestTimeoutMs) {
         this.port = port;
         this.threadCount = threadCount;
         this.rootUrl = rootUrl;
+        this.requestTimeoutMs = requestTimeoutMs;
     }
 
     public int getPort() {
@@ -30,5 +33,9 @@ public final class StartOptions {
 
     public Optional<String> getRootUrl() {
         return Optional.ofNullable(rootUrl);
+    }
+
+    public Optional<Integer> getRequestTimeoutMs() {
+        return Optional.ofNullable(requestTimeoutMs);
     }
 }

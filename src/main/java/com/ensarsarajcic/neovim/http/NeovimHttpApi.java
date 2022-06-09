@@ -11,17 +11,17 @@ import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
 
 @NeovimJavaHostedPlugin
-public final class NeovimRestApi {
+public final class NeovimHttpApi {
     private final NeovimJavaPluginHost host;
 
-    public NeovimRestApi(NeovimJavaPluginHost host) {
+    public NeovimHttpApi(NeovimJavaPluginHost host) {
         this.host = host;
     }
 
     @NeovimRequestHandler
     public boolean start(StartOptions options) throws NeovimRequestException {
         try {
-            var handler = new NeovimHttpHandler(host.getApiInfo(), host.getReactiveClient());
+            var handler = new NeovimHttpHandler(host.getApiInfo(), host.getReactiveClient(), options);
             var server = HttpServer.create();
             server.setExecutor(
                     Executors.newFixedThreadPool(

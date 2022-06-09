@@ -15,7 +15,7 @@
         <dependency>
             <groupId>com.ensarsarajcic.neovim.java</groupId>
             <artifactId>plugin-host</artifactId>
-            <version>0.4.5</version>
+            <version>0.4.6</version>
         </dependency>
     </dependencies>
 
