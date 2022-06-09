@@ -1,4 +1,4 @@
-package com.ensarsarajcic.neovim.rest;
+package com.ensarsarajcic.neovim.http;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

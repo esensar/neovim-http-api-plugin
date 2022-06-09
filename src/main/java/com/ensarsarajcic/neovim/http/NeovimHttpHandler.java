@@ -1,7 +1,10 @@
-package com.ensarsarajcic.neovim.rest;
+package com.ensarsarajcic.neovim.http;
 
 import com.ensarsarajcic.neovim.java.api.types.apiinfo.ApiInfo;
 import com.ensarsarajcic.neovim.java.api.types.apiinfo.FunctionInfo;
+import com.ensarsarajcic.neovim.java.api.types.msgpack.Buffer;
+import com.ensarsarajcic.neovim.java.api.types.msgpack.Tabpage;
+import com.ensarsarajcic.neovim.java.api.types.msgpack.Window;
 import com.ensarsarajcic.neovim.java.corerpc.message.RequestMessage;
 import com.ensarsarajcic.neovim.java.corerpc.reactive.ReactiveRpcClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -33,7 +36,58 @@ public final class NeovimHttpHandler implements HttpHandler  {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         System.err.printf("Got request: %s %s%n", exchange.getRequestMethod(), exchange.getRequestURI());
-        var name = "nvim_" + exchange.getRequestURI().getPath().replace("/", "");
+
+        var arguments = new ArrayList<>();
+        var prefix = "nvim_";
+        String name;
+        try {
+            if (exchange.getRequestURI().getPath().startsWith("/win")) {
+                prefix = prefix + "win_";
+                name = exchange.getRequestURI().getPath().replaceFirst("/win/\\d*", "");
+                var id = Integer.parseInt(exchange.getRequestURI().getPath().split("/")[2]);
+                arguments.add(new Window(id));
+            } else if (exchange.getRequestURI().getPath().startsWith("/buf")) {
+                prefix = prefix + "buf_";
+                name = exchange.getRequestURI().getPath().replaceFirst("/buf/\\d*", "");
+                var id = Integer.parseInt(exchange.getRequestURI().getPath().split("/")[2]);
+                arguments.add(new Buffer(id));
+            } else if (exchange.getRequestURI().getPath().startsWith("/tabpage")) {
+                prefix = prefix + "tabpage_";
+                name = exchange.getRequestURI().getPath().replaceFirst("/tabpage/\\d*", "");
+                var id = Integer.parseInt(exchange.getRequestURI().getPath().split("/")[2]);
+                arguments.add(new Tabpage(id));
+            } else {
+                name = exchange.getRequestURI().getPath();
+            }
+            name = name.replace("/", "");
+        } catch (Exception ex) {
+            var response = ex.getMessage().getBytes(StandardCharsets.UTF_8);
+            exchange.sendResponseHeaders(400, response.length);
+            exchange.getResponseBody().write(response);
+            exchange.close();
+            return;
+        }
+
+        switch (exchange.getRequestMethod()) {
+            case "GET":
+                prefix = prefix + "get_";
+                break;
+            case "PUT":
+                prefix = prefix + "set_";
+                break;
+            case "DELETE":
+                if (name.isEmpty()) {
+                    // Special case for nvim_buf_delete
+                    prefix =  prefix + "delete";
+                } else {
+                    prefix = prefix + "del_";
+                }
+                break;
+        }
+
+        name = prefix + name;
+
+        System.err.printf("Final method name %s%n", name);
         if (!functions.containsKey(name)) {
             exchange.sendResponseHeaders(404, -1);
             exchange.close();
@@ -44,17 +98,17 @@ public final class NeovimHttpHandler implements HttpHandler  {
 
         var bodyBytes = exchange.getRequestBody().readAllBytes();
         var requestBody = mapper.reader().readTree(bodyBytes);
-        if (!requestBody.isArray()) {
+        if (function.getParameters().size() > arguments.size() && !requestBody.isArray()) {
             var response = "Body should always be an array!".getBytes(StandardCharsets.UTF_8);
             exchange.sendResponseHeaders(400, response.length);
             exchange.getResponseBody().write(response);
             exchange.close();
             return;
         }
-        if (function.getParameters().size() != requestBody.size()) {
+        if (function.getParameters().size() != requestBody.size() + arguments.size()) {
             var response = String.format(
                     "Expected %d arguments, but found %d",
-                    function.getParameters().size(),
+                    function.getParameters().size() - arguments.size(),
                     requestBody.size()
             ).getBytes(StandardCharsets.UTF_8);
             exchange.sendResponseHeaders(400, response.length);
@@ -63,7 +117,6 @@ public final class NeovimHttpHandler implements HttpHandler  {
             return;
         }
 
-        var arguments = new ArrayList<>();
         requestBody.elements().forEachRemaining(arguments::add);
         var builder = new RequestMessage.Builder(name)
                 .addArguments(arguments);

@@ -1,4 +1,4 @@
-package com.ensarsarajcic.neovim.rest;
+package com.ensarsarajcic.neovim.http;
 
 import com.ensarsarajcic.neovim.java.handler.annotations.NeovimRequestHandler;
 import com.ensarsarajcic.neovim.java.handler.errors.NeovimRequestException;
