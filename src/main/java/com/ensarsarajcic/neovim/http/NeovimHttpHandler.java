@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -169,14 +170,20 @@ public final class NeovimHttpHandler implements HttpHandler  {
                 var bodyBytes = exchange.getRequestBody().readAllBytes();
                 var requestBody = mapper.reader().readTree(bodyBytes);
                 if (bodyBytes.length > 0 && !requestBody.isObject()) {
-                    var response = "Body should be an object!".getBytes(StandardCharsets.UTF_8);
-                    exchange.sendResponseHeaders(400, response.length);
-                    exchange.getResponseBody().write(response);
-                    exchange.close();
-                    return;
+                    if (requestBody.isArray()) {
+                        arguments.add(mapper.convertValue(requestBody, new TypeReference<List<Object>>(){}));
+                    } else {
+                        var response = "Body should be an object or an array for some calls!".getBytes(StandardCharsets.UTF_8);
+                        exchange.sendResponseHeaders(400, response.length);
+                        exchange.getResponseBody().write(response);
+                        exchange.close();
+                        return;
+                    }
                 }
 
-                requestMap.putAll(mapper.convertValue(requestBody, new TypeReference<>(){}));
+                if (!requestBody.isArray()) {
+                    requestMap.putAll(mapper.convertValue(requestBody, new TypeReference<>(){}));
+                }
             }
         } catch (IOException ex) {
             log.error("Body parse fail", ex);
