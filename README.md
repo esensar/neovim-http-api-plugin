@@ -24,7 +24,7 @@ use {
 }
 ```
 
-For this way to work, `require("java_plugin_host").setup()` needs to be called and `rplugins.load_hosted` needs to be true (it is true by default).
+For this way to work, `require("java_plugin_host").setup()` needs to be called and `rplugins.load_hosted` needs to be true (it is true by default). This is one of the easiest ways to install the plugin and it also supports any custom documentation added in `doc/` directory.
 
 #### Java plugin host
 
@@ -47,7 +47,10 @@ require("java_plugin_host").setup {
       -- ...
       -- This is optional in case of this plugin, since it is also deployed to maven central
       -- But usually, this provides an easier way for plugin authors to deploy their plugins, directly to GitHub package repository
-      "https://maven.pkg.github.com/esensar/neovim-http-api-plugin"
+      {
+        id = "github",
+        url = "https://maven.pkg.github.com/esensar/neovim-http-api-plugin"
+      }
       -- ...
     }
     -- ...
@@ -55,6 +58,7 @@ require("java_plugin_host").setup {
   -- ...
 }
 ```
+**NOTE**: To use custom repositories (GitHub), [GitHub Packages Auth](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry) needs to be set up.
 
 ### Starting the API
 
