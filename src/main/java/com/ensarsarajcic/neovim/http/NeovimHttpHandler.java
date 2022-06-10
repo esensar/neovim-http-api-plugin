@@ -74,7 +74,7 @@ public final class NeovimHttpHandler implements HttpHandler  {
             }
             name = name.replace("/", "");
         } catch (Exception ex) {
-            log.info("Error: {}", ex.getMessage());
+            log.error("Error: {}", ex.getMessage());
             ex.printStackTrace();
             var response = ex.getMessage().getBytes(StandardCharsets.UTF_8);
             exchange.sendResponseHeaders(400, response.length);
@@ -102,8 +102,7 @@ public final class NeovimHttpHandler implements HttpHandler  {
 
         name = prefix + name;
 
-        log.info("Final method name: {}", name);
-        log.info("PreNext log");
+        log.debug("Final method name: {}", name);
         if (!functions.containsKey(name)) {
             log.info("Name: {}  - not found", name);
             var response = String.format(
@@ -115,14 +114,13 @@ public final class NeovimHttpHandler implements HttpHandler  {
             exchange.close();
             return;
         }
-        log.info("Next log");
 
         var function = functions.get(name);
 
         Map<String, Object> requestMap = new HashMap<>();
 
         var queryParamsString = exchange.getRequestURI().getQuery();
-        log.info("Parsing query: {}", queryParamsString);
+        log.debug("Parsing query: {}", queryParamsString);
         if (queryParamsString != null) {
             for (var param : queryParamsString.split("&")) {
                 var values = param.split("=");
@@ -164,7 +162,6 @@ public final class NeovimHttpHandler implements HttpHandler  {
             }
         }
 
-        log.info("Starting body parse");
         try {
             if (exchange.getRequestBody().available() > 0) {
                 var bodyBytes = exchange.getRequestBody().readAllBytes();
@@ -205,7 +202,7 @@ public final class NeovimHttpHandler implements HttpHandler  {
             }
         }
 
-        log.info("Arguments prepared: {}", arguments);
+        log.debug("Arguments prepared: {}", arguments);
         if (function.getParameters().size() != arguments.size()) {
             var response = String.format(
                     "Expected %d arguments, but found %d",
@@ -221,7 +218,7 @@ public final class NeovimHttpHandler implements HttpHandler  {
         var builder = new RequestMessage.Builder(name)
                 .addArguments(arguments);
 
-        log.info("Message prepared: {}", builder);
+        log.debug("Message prepared: {}", builder);
         client.response(builder).orTimeout(requestTimeoutMs, TimeUnit.MILLISECONDS)
                 .whenComplete(
                         (responseMessage, throwable) -> {
