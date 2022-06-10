@@ -4,7 +4,6 @@
 
     <groupId>com.ensarsarajcic.neovim.http</groupId>
     <artifactId>neovim-http-api-plugin</artifactId>
-    <packaging>pom</packaging>
     <version>0.1.0</version>
 
     <name>neovim-http-api-plugin</name>
