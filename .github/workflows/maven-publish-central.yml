@@ -1,4 +1,4 @@
-name: Maven Package Release
+name: Maven Package Release for Central
 
 on:
   workflow_dispatch:
