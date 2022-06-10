@@ -2,6 +2,8 @@
 
 This plugin serves as an example of Java plugin that can be used with [neovim-java-plugin-host](https://github.com/esensar/neovim-java-plugin-host). It provides Neovim RPC API through HTTP endpoints.
 
+**NOTE:** This example uses request instead of notification for starting. In this case, notification could have been used as well (and is probably the better solution, since it won't block Neovim). To use notifications instead `@NeovimNotificationHandler` annotation should be used, and from neovim `notify` instead of `request` should be used.
+
 ## Requirements
 
 - [Neovim](https://neovim.io/) version 0.7.0+
