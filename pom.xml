@@ -7,6 +7,10 @@
     <packaging>pom</packaging>
     <version>0.1.0</version>
 
+    <name>neovim-http-api-plugin</name>
+    <description>HTTP API wrapper for Neovim RPC API</description>
+    <url>https://github.com/esensar/neovim-http-api-plugin</url>
+
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
